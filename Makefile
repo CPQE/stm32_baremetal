@@ -1,5 +1,6 @@
 CC = arm-none-eabi-gcc
-C_INCLUDES = -Ichip_headers/CMSIS/Device/ST/STM32F4xx/Include -Ichip_headers/CMSIS/Include
+C_INCLUDES = -Ichip_headers/CMSIS/Device/ST/STM32F4xx/Include \
+			 -Ichip_headers/CMSIS/Include
 C_DEFS = \
 -DSTM32F411xE \
 -DSTM32F411RETx \
@@ -9,18 +10,15 @@ C_DEFS = \
 -DDEBUG
 CFLAGS = -c -mcpu=cortex-m4 -mthumb -std=gnu11 -g3 -O0 $(C_INCLUDES) $(C_DEFS)
 LDFLAGS = -nostdlib -T stm32_ls.ld -Wl,-Map=makefile_project.map
-
+SRC = main.c stm32f411_startup.c gpio.c
+OBJ = $(SRC:.c=.o)
 final : makefile_project.elf
 
-makefile_project.elf : main.o stm32f411_startup.o
+makefile_project.elf : $(OBJ)
 	$(CC) $(LDFLAGS) $^ -o $@
 
-main.o: main.c
-	$(CC) $(CFLAGS) $^ -o $@
-
-stm32f411_startup.o : stm32f411_startup.c 
-	$(CC) $(CFLAGS) $^ -o $@
-
+%.o : %.c
+	$(CC) $(CFLAGS) $< -o $@
 #after running 'make', in the first terminal run 'make flash' or 'make run'
 
 .PHONY: flash
