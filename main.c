@@ -1,18 +1,34 @@
 #include <stdint.h>
-#include "stm32f4xx.h"
+#include "gpio.h"
+#include "systick.h"
 
-#define GPIOAEN (1U<<0)
-#define PIN5 	(1U<<5)
-#define LED_PIN PIN5
+bool btn_state; //global variable with external linkage
 
 int main(void){
-	RCC->AHB1ENR |= GPIOAEN;
-	GPIOA->MODER |= (1U<<10); 
-	GPIOA->MODER &= ~(1U<<11); 
+	led_init();
+
 	while(1){
-		GPIOA->ODR ^= LED_PIN;
-		for(volatile uint32_t i = 0; i < 300000; i++){
-			
-		}
+		/* delay for 500ms using systick */
+		systick_msec_delay(500); 
+		/* Toggle the LED */
+		led_toggle();
 	}
+	return 0; 
 }
+
+
+// button_init();
+// btn_state = get_btn_state(); 
+// if(btn_state){
+		// 	led_on(); 
+		// }
+		// else{
+		// 	led_off(); 
+		// // 
+		// led_on(); 
+
+		// for(volatile uint32_t i = 0; i < 800000; i++){}
+		// led_off(); 
+		// for(volatile uint32_t i = 0; i < 800000; i++){}
+// }
+// 

@@ -10,8 +10,9 @@ C_DEFS = \
 -DDEBUG
 CFLAGS = -c -mcpu=cortex-m4 -mthumb -std=gnu11 -g3 -O0 $(C_INCLUDES) $(C_DEFS)
 LDFLAGS = -nostdlib -T stm32_ls.ld -Wl,-Map=makefile_project.map
-SRC = main.c stm32f411_startup.c gpio.c
+SRC = main.c stm32f411_startup.c gpio.c systick.c
 OBJ = $(SRC:.c=.o)
+	
 final : makefile_project.elf
 
 makefile_project.elf : $(OBJ)
@@ -19,6 +20,7 @@ makefile_project.elf : $(OBJ)
 
 %.o : %.c
 	$(CC) $(CFLAGS) $< -o $@
+
 #after running 'make', in the first terminal run 'make flash' or 'make run'
 
 .PHONY: flash
