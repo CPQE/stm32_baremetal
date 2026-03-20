@@ -1,0 +1,35 @@
+next              # step over
+step              # step into
+finish            # run until end of function
+continue          # run freely
+
+print variablename        # print a variable
+info registers            # dump all CPU registers
+x/4xw 0x40020014          # examine memory address GPIOA ODR)
+
+break main.c:42   # breakpoint at specific line
+delete 1          # delete breakpoint 1
+info breakpoints  # list all breakpoints
+
+monitor reset halt  # reset and pause at startup anytime
+quit               # exit GDB (also kills OpenOCD connection)
+
+
+break main          # breakpoint at function
+break 0x08001290    # breakpoint at address
+
+info breakpoints    # list all breakpoints (shows their numbers)
+
+delete              # delete ALL breakpoints
+delete 1            # delete breakpoint number 1
+delete 1 2 3        # delete multiple
+
+disable 1           # disable without deleting
+enable 1            # re-enable
+
+tbreak main         # temporary breakpoint - auto-deletes after first hit
+
+watch GPIOA_OD_R    # watchpoint - breaks when variable/address is written
+rwatch GPIOA_OD_R   # breaks when read
+awatch GPIOA_OD_R   # breaks on read or write
+info watchpoints    # list watchpoints
