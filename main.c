@@ -5,18 +5,42 @@
 #include "tim.h"
 #include "uart.h"
 
+#include "adxl1345.h"
+
+int16_t accel_x, accel_y, accel_z;
+double accel_x_g, accel_y_g, accel_z_g; 
+uint8_t data_buffer[6]; 
 // bool btn_state; //global variable with external linkage
 
 
 int main(void){
 	uart_init(); 
-	uint32_t seq_num = 0; 
+	adxl_init(); 
 	while(1){
-		uart_print("Hi from cyrus!\r\n"); 
+		adxl_read(ADXL345_REG_DATA_START, data_buffer); 
+		accel_x = (int16_t) ((data_buffer[1] << 8) | data_buffer[0]); 
+		accel_y = (int16_t)((data_buffer[3] << 8) | data_buffer[2]); 
+		accel_z = (int16_t) ((data_buffer[5] << 8) | data_buffer[4]); 
+
+		//conver raw data to g values
+		accel_x_g = accel_x * 0.078;
+		accel_y_g = accel_y * 0.078;
+		accel_z_g = accel_z * 0.078;
+		//print values ofr debuggin purposes
+		uint8_t buff[20];
+		sprintf(buff, "accel_x: %d accel_y: %d accel_z: %d\n\r", accel_x_g, accel_y_g, accel_z_g); 
+		uart_print(buff); 
 	}
 	return 0; 
 }
 
+
+
+	// uart_init(); 
+	// uint32_t seq_num = 0; 
+	// while(1){
+	// 	uart_print("Hi from cyrus!\r\n"); 
+	// }
 // led_init();
 // tim2_1hz_init(); 
 // led_toggle(); 
