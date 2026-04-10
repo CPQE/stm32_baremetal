@@ -1,17 +1,16 @@
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 #include "gpio.h"
 #include "systick.h"
 #include "tim.h"
 #include "uart.h"
 
-#include "adxl1345.h"
-
+#include "adxl345.h"
 int16_t accel_x, accel_y, accel_z;
 double accel_x_g, accel_y_g, accel_z_g; 
 uint8_t data_buffer[6]; 
 // bool btn_state; //global variable with external linkage
-
 
 int main(void){
 	uart_init(); 
@@ -27,9 +26,18 @@ int main(void){
 		accel_y_g = accel_y * 0.078;
 		accel_z_g = accel_z * 0.078;
 		//print values ofr debuggin purposes
-		uint8_t buff[20];
-		sprintf(buff, "accel_x: %d accel_y: %d accel_z: %d\n\r", accel_x_g, accel_y_g, accel_z_g); 
-		uart_print(buff); 
+		uart_print("accel_x: ");
+		uart_print_double(accel_x_g);
+		uart_print("\r\n");
+
+		uart_print("accel_y: ");
+		uart_print_double(accel_y_g);
+		uart_print("\r\n");
+
+		uart_print("accel_z: ");
+		uart_print_double(accel_z_g);
+		uart_print("\r\n");
+
 	}
 	return 0; 
 }

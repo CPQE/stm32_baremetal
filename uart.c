@@ -43,6 +43,45 @@ static void uart_set_baudrate(uint32_t periph_clk, uint32_t baudrate){
 	USART2->BRR = compute_uart_bd(periph_clk, baudrate); 
 }
 
+void uart_print_int(int value) {
+    char buf[12]; // enough for -2147483648
+    int i = 0;
+    if (value == 0) {
+        uart_write('0');
+        return;
+    }
+    if (value < 0) {
+        uart_write('-');
+        value = -value;
+    }
+    while (value > 0) {
+        buf[i++] = '0' + (value % 10);
+        value /= 10;
+    }
+    while (i--) {
+        uart_write(buf[i]);
+    }
+}
+
+void uart_print_double(double value) {
+    if (value < 0) {
+        uart_write('-');
+        value = -value;
+    }
+    int whole = (int)value;
+    int frac = (int)((value - whole) * 100);  // 2 decimal places, can change
+    uart_print_int(whole);
+    uart_write('.');
+    if (frac < 10) uart_write('0'); // leading zero
+    uart_print_int(frac);
+}
+
+void uart_print_label(const char *label, int value) {
+    uart_print(label);
+    uart_print_int(value);
+    uart_print("\r\n");
+}
+
 
 
 
