@@ -1,5 +1,5 @@
 #include "adxl345.h"
-
+#include "spi.h"
 
 void adxl_init(void){
 	//enable spi GPIO

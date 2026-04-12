@@ -18,6 +18,6 @@
 
 void adxl_init(void); 
 void adxl_read(uint8_t address, uint8_t *rxdata); 
-void adx1_write(uint8_t address, uint8_t value);
+void adxl_write(uint8_t address, uint8_t value);
 
 #endif

@@ -63,7 +63,7 @@ void uart_print_int(int value) {
     }
 }
 
-void uart_print_double(double value) {
+void uart_print_float(float value) {
     if (value < 0) {
         uart_write('-');
         value = -value;

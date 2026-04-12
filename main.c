@@ -2,13 +2,14 @@
 #include <stdio.h>
 #include <string.h>
 #include "gpio.h"
-#include "systick.h"
-#include "tim.h"
+// #include "systick.h"
+// #include "tim.h"
 #include "uart.h"
 
 #include "adxl345.h"
+#include "spi.h"
 int16_t accel_x, accel_y, accel_z;
-double accel_x_g, accel_y_g, accel_z_g; 
+float accel_x_g, accel_y_g, accel_z_g; 
 uint8_t data_buffer[6]; 
 // bool btn_state; //global variable with external linkage
 
@@ -22,20 +23,20 @@ int main(void){
 		accel_z = (int16_t) ((data_buffer[5] << 8) | data_buffer[4]); 
 
 		//conver raw data to g values
-		accel_x_g = accel_x * 0.078;
-		accel_y_g = accel_y * 0.078;
-		accel_z_g = accel_z * 0.078;
+		accel_x_g = accel_x * 0.078f;
+		accel_y_g = accel_y * 0.078f;
+		accel_z_g = accel_z * 0.078f;
 		//print values ofr debuggin purposes
 		uart_print("accel_x: ");
-		uart_print_double(accel_x_g);
+		uart_print_float(accel_x_g);
 		uart_print("\r\n");
 
 		uart_print("accel_y: ");
-		uart_print_double(accel_y_g);
+		uart_print_float(accel_y_g);
 		uart_print("\r\n");
 
 		uart_print("accel_z: ");
-		uart_print_double(accel_z_g);
+		uart_print_float(accel_z_g);
 		uart_print("\r\n");
 
 	}

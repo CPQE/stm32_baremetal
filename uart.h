@@ -19,5 +19,5 @@ void uart_print(const char *str);
 void uart_init(void);
 void uart_print_int(int value);
 void uart_print_label(const char *label, int value);
-void uart_print_double(double value);
+void uart_print_float(float value);
 #endif 
