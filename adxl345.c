@@ -8,7 +8,7 @@ void adxl_init(void){
 	adxl_write(ADXL345_REG_DATA_FORMAT, ADXL345_RANGE_4G); 
 	adxl_write(ADXL345_REG_POWER_CTL, ADXL345_RESET); 
 	adxl_write(ADXL345_REG_POWER_CTL, ADXL345_MEASURE_BIT); 
-}
+}  
 
 void adxl_read(uint8_t address, uint8_t *rxdata){
 	//set read op

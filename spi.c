@@ -58,7 +58,7 @@ void spi1_config(void){
 	//enable SPI module
 	SPI1->CR1 |= (1<<6); 
 }
-
+ 
 void spi1_transmit(uint8_t *data, uint32_t size){
 	uint32_t i = 0; 
 	uint8_t temp; 
