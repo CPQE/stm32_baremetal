@@ -5,28 +5,55 @@
 // #include "systick.h"
 // #include "tim.h"
 #include "uart.h"
-
+#include "stm32f4xx.h"
 #include "adxl345.h"
 #include "spi.h"
-int16_t accel_x, accel_y, accel_z;
-float accel_x_g, accel_y_g, accel_z_g; 
-uint8_t data_buffer[6]; 
+int16_t accel_x, accel_y, accel_z; //store raw accel data
+float accel_x_g, accel_y_g, accel_z_g; //store converted acceleromter data in g units
+uint8_t data_buffer[6]; //holds raw data bytes to read from ADXL345
 // bool btn_state; //global variable with external linkage
 
 int main(void){
 	uart_init(); 
-	adxl_init(); 
+	adxl_init();  //initialize the accelerometer
 	while(1){
-		adxl_read(ADXL345_REG_DATA_START, data_buffer); 
+		//reads 6 bytes of data starting at 0x32, DATAX0.
+		// This gives X0,X1, Y0,Y1, Z0,Z1 data all in 1 chunk and stuffs them 
+		//into data_buffer.
+		adxl_read(ADXL345_REG_DATA_START, data_buffer);  
+		/*
+		Each axis needs 16 bits to represent the acceleration value.
+		But the ADXL345 only has 8-bit registers, so it splits each 16-bit value across 
+		2 consecutive registers:
+		X-axis:
+		    Register 0x32 = X_LSB (lower 8 bits) (X0 in datasheet) 
+		    Register 0x33 = X_MSB (upper 8 bits) (X1 in datasheet) 
+
+		Y-axis:
+		    Register 0x34 = Y_LSB  (Y0 in datasheet) 
+		    Register 0x35 = Y_MSB  (Y1 in datasheet) 
+
+		Z-axis:
+		    Register 0x36 = Z_LSB (Z0 in datasheet)
+		    Register 0x37 = Z_MSB (Z1 in datasheet)
+		When you do multi-byte read starting at 0x32, you get all 6 bytes in one SPI transaction
+		*/
 		accel_x = (int16_t) ((data_buffer[1] << 8) | data_buffer[0]); 
 		accel_y = (int16_t)((data_buffer[3] << 8) | data_buffer[2]); 
 		accel_z = (int16_t) ((data_buffer[5] << 8) | data_buffer[4]); 
 
+		uart_print("RAW - X: ");
+		uart_print_int(accel_x);
+		uart_print(" Y: ");
+		uart_print_int(accel_y);
+		uart_print(" Z: ");
+		uart_print_int(accel_z);
+		uart_print("\r\n");
 		//conver raw data to g values
-		accel_x_g = accel_x * 0.078f;
-		accel_y_g = accel_y * 0.078f;
-		accel_z_g = accel_z * 0.078f;
-		//print values ofr debuggin purposes
+		accel_x_g = accel_x * 0.0039f;
+		accel_y_g = accel_y * 0.0039f;
+		accel_z_g = accel_z * 0.0039f;
+		//print values for debugging purposes
 		uart_print("accel_x: ");
 		uart_print_float(accel_x_g);
 		uart_print("\r\n");
@@ -38,7 +65,8 @@ int main(void){
 		uart_print("accel_z: ");
 		uart_print_float(accel_z_g);
 		uart_print("\r\n");
-
+		// Delay ~100ms between reads
+		for (volatile int i = 0; i < 800000; i++){}
 	}
 	return 0; 
 }

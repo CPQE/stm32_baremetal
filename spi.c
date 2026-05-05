@@ -12,11 +12,11 @@ void spi_gpio_init(void){
 	GPIOA->MODER &= ~(1U<<10);
 	GPIOA->MODER |= (1U<<11); 
 	GPIOA->MODER &= ~(1U<<12); 
-	GPIOA->MODER |= ~(1U<<13); 
+	GPIOA->MODER |= (1U<<13); 
 	GPIOA->MODER &= ~(1U<<14); 
-	GPIOA->MODER |= ~(1U<<15); 
+	GPIOA->MODER |= (1U<<15); 
 	GPIOA->MODER &= ~(1U<<18); 
-	GPIOA->MODER |= ~(1U<<19); 
+	GPIOA->MODER |= (1U<<19); 
 
 	GPIOA->AFR[0] |= (1U<<20); 
 	GPIOA->AFR[0] &= ~(1U<<21); 
@@ -47,14 +47,14 @@ void spi1_config(void){
 	//enable full duplex
 	SPI1->CR1 &= ~(1U<<10); 
 	//set MSB first (BIG ENDIAN)
-	SPI1->CR1 &= ~(1U<<2); 
+	SPI1->CR1 &= ~(1U<<7); 
 	//set mode to master
-	SPI1->CR1|=(1U<<2); 
+	SPI1->CR1 |=(1U<<2); 
 	//Set 8 bit data mode
-	SPI1->CR1&= ~(1U<<11); 
+	SPI1->CR1 &= ~(1U<<11); 
 	//select software slave management by setting SSM=1 and SSI = 1
-	SPI1->CR1|=(1<<8);
-	SPI1->CR1|=(1<<9);
+	SPI1->CR1 |= (1<<8);
+	SPI1->CR1 |= (1<<9);
 	//enable SPI module
 	SPI1->CR1 |= (1<<6); 
 }
@@ -62,36 +62,37 @@ void spi1_config(void){
 void spi1_transmit(uint8_t *data, uint32_t size){
 	uint32_t i = 0; 
 	uint8_t temp; 
-	while(i<size){
-		//wait until TXE is set
-		while(!(SPI1->SR & (SR_TXE))){
-			//write data to data register
-			SPI1->DR = data[i]; 
-			i++; 
-		}
-		//wait until TXE is et: 
-		while(!(SPI1->SR & (SR_TXE))){}
-		while(SPI1->SR & (SR_BSY)){}
-		//clear OVR flag
-		temp = SPI1->DR;
-	    temp = SPI1->SR; 
+	while(i < size){
+		//wait until TXE set (nothing left to transmit from previous calls)
+		while( ! (SPI1->SR & (SR_TXE) )) {}
+		//write data to data register
+		SPI1->DR = data[i];
+	    i++; 
 	}
+	//wait until TXE set
+	while(!(SPI1->SR & (SR_TXE) )){}
+    //wait for BUSY flag to reset
+	while((SPI1->SR & (SR_BSY) )) {}
+	//clear OVR flag by doing 'software operation'
+	temp = SPI1->DR;
+	temp = SPI1->SR; 
 }
 
 void spi1_receive(uint8_t *data, uint32_t size){
-	while(size){
+	while(size){ //every byte transmitted one at a time
+		while(!(SPI1->SR & SR_TXE)){}
 		SPI1->DR = 0; 
 		while(!(SPI1->SR & (SR_RXNE))){}
 		*data++ = (SPI1->DR); 
 		size--; 
 	}
 }
-//controll the CS pin
+//control the CS pin, enable slave device
 void cs_enable(void){
 	GPIOA->ODR &= ~(1U<<9); 
 }
 
-//pull high to disable
+//pull high to disable slave device
 void cs_disable(void){
 	GPIOA->ODR |= (1U<<9); 
 }

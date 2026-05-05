@@ -17,6 +17,8 @@ void adxl_read(uint8_t address, uint8_t *rxdata){
 	address |= ADXL345_MULTI_BYTE_ENABLE; //enable multi-byte
 	cs_enable(); //pull cs line low to enable slave
 	spi1_transmit(&address,1); //send address
+	// Small delay for sensor to prepare data
+	for(volatile int i = 0; i < 100; i++){}
 	spi1_receive(rxdata,6); //read 6 bytes
 	cs_disable(); //pull cs line high to disable slave
 }
@@ -27,8 +29,8 @@ void adxl_write(uint8_t address, uint8_t value){
 	data[0] = address | ADXL345_MULTI_BYTE_ENABLE;
 	//put data into buffer
 	data[1] = value; 
-	cs_enable(); 
-	spi1_transmit(data, 2); 
-	cs_disable(); 
+	cs_enable(); //pull cs line low to enable slave
+	spi1_transmit(data, 2); //transmit data and address
+	cs_disable(); //pull cs line high to disable slave
 }
 

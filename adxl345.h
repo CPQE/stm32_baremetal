@@ -13,7 +13,7 @@
 #define ADXL345_RESET (0x00)
 #define ADXL345_MEASURE_BIT (0x08)
 
-#define ADXL345_MULTI_BYTE_ENABLE (0x4)
+#define ADXL345_MULTI_BYTE_ENABLE (0x40)
 #define ADXL345_READ_OPERATION (0x80)
 
 void adxl_init(void); 
