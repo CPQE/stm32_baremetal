@@ -80,6 +80,7 @@ void spi1_transmit(uint8_t *data, uint32_t size){
 
 void spi1_receive(uint8_t *data, uint32_t size){
 	while(size){ //every byte transmitted one at a time
+		while(!(SPI1->SR & SR_TXE)){}
 		SPI1->DR = 0; 
 		while(!(SPI1->SR & (SR_RXNE))){}
 		*data++ = (SPI1->DR); 

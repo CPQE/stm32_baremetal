@@ -67,7 +67,7 @@ void uart_print_float(float value) {
         value = -value;
     }
     int whole = (int)value;
-    int frac = (int)((value - whole) * 100);  // 2 decimal places, can change
+    int frac = (int)((value - whole) * 1000);  // 2 decimal places, can increase
     uart_print_int(whole);
     uart_write('.');
     if (frac < 10) uart_write('0'); // leading zero
