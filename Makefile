@@ -24,9 +24,11 @@ makefile_project.elf : $(OBJ)
 
 #after running 'make', in the first terminal run 'make flash' or 'make run'
 
-.PHONY: flash
-flash : 
+.PHONY: flash flashTest
+flash :
 	openocd -f board/st_nucleo_f4.cfg 
+flashTest : 
+	openocd -f board/st_nucleo_f4.cfg -c "init" -c "program makefile_project.elf verify reset exit"
 
 #then in 2nd terminal run 'make debug' or 'make run'
 
@@ -48,6 +50,24 @@ run:
 	-ex "monitor reset halt" \
 	-ex "continue" 
 
+# Forces SWD to attach while the chip is held in reset, so even if 
+# firmware disables SWD or crashes instantly,  debugger can start
+# erase_chip wipes flash and restores the MCU to a clean state.
+.PHONY: reset_brick erase_chip
+reset_brick:
+	openocd -f board/st_nucleo_f4.cfg \
+        -c "reset_config srst_only srst_nogate connect_assert_srst" \
+        -c "init" \
+        -c "reset halt" \
+        -c "exit"
+erase_chip:
+	openocd -f board/st_nucleo_f4.cfg \
+		-c "init" \
+		-c "reset halt" \
+		-c "halt" \
+		-c "stm32f4x mass_erase 0" \
+		-c "exit"
+
 #for linux 
 clean :
 	rm -f *.o *.elf *.map
@@ -55,3 +75,4 @@ clean :
 #for windows
 cleanWin :
 	del -f *.o *.elf *.map
+
