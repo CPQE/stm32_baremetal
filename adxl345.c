@@ -27,8 +27,8 @@ void adxl_write(uint8_t address, uint8_t value){
 	data[0] = address | ADXL345_MULTI_BYTE_ENABLE;
 	//put data into buffer
 	data[1] = value; 
-	cs_enable(); 
-	spi1_transmit(data, 2); 
-	cs_disable(); 
+	cs_enable(); //pull cs line low to enable slave
+	spi1_transmit(data, 2); //transmit data and address
+	cs_disable(); //pull cs line high to disable slave
 }
 
