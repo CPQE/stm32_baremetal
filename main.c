@@ -14,8 +14,11 @@ uint8_t data_buffer[6]; //holds raw data bytes to read from ADXL345
 // bool btn_state; //global variable with external linkage
 
 int main(void){
+	SCB->CPACR |= (0xF << 20); //needed to enable FPU on f411re.
+	// Confirm in ARM Cortex M4 Technical Reference Manual (TRM) on page 71, section 7.3.2
 	uart_init(); 
 	adxl_init();  //initialize the accelerometer
+	uart_print("+/-4G  X,Y,Z: ");
 	while(1){
 		//reads 6 bytes of data starting at 0x32, DATAX0.
 		// This gives X0,X1, Y0,Y1, Z0,Z1 data all in 1 chunk and stuffs them 
@@ -42,42 +45,29 @@ int main(void){
 		accel_y = (int16_t)((data_buffer[3] << 8) | data_buffer[2]); 
 		accel_z = (int16_t) ((data_buffer[5] << 8) | data_buffer[4]); 
 
-		uart_print("RAW - X: ");
-		uart_print_int(accel_x);
-		uart_print(" Y: ");
-		uart_print_int(accel_y);
-		uart_print(" Z: ");
-		uart_print_int(accel_z);
-		uart_print("\r\n");
 		//conver raw data to g values
 		accel_x_g = accel_x * 0.0039f;
 		accel_y_g = accel_y * 0.0039f;
 		accel_z_g = accel_z * 0.0039f;
-		//print values for debugging purposes
-		uart_print("accel_x: ");
+		// int32_t accel_x_mg = accel_x * 4;   // 4 mg/LSB
+		// int32_t accel_y_mg = accel_y * 4;   // 4 mg/LSB
+		// int32_t accel_z_mg = accel_z * 4;   // 4 mg/LSB
+
+
 		uart_print_float(accel_x_g);
-		uart_print("\r\n");
-
-		uart_print("accel_y: ");
+		uart_print(",");
 		uart_print_float(accel_y_g);
-		uart_print("\r\n");
-
-		uart_print("accel_z: ");
+		uart_print(",");
 		uart_print_float(accel_z_g);
 		uart_print("\r\n");
+
 		// Delay ~100ms between reads
-		for (volatile int i = 0; i < 800000; i++){}
+		for (volatile int i = 0; i < 20000; i++){}   // slower loop
 	}
 	return 0; 
 }
 
 
-
-	// uart_init(); 
-	// uint32_t seq_num = 0; 
-	// while(1){
-	// 	uart_print("Hi from cyrus!\r\n"); 
-	// }
 // led_init();
 // tim2_1hz_init(); 
 // led_toggle(); 

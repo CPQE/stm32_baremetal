@@ -7,37 +7,24 @@
 #define SR_BSY (1U<<7)  //SPI interface busy with a transfer
 
 void spi_gpio_init(void){
-	//set pin A5-7 to alternate function (01)
-	RCC->AHB1ENR |= GPIOAEN;
-	GPIOA->MODER &= ~(1U<<10);
-	GPIOA->MODER |= (1U<<11); 
-	GPIOA->MODER &= ~(1U<<12); 
-	GPIOA->MODER |= (1U<<13); 
-	GPIOA->MODER &= ~(1U<<14); 
-	GPIOA->MODER |= (1U<<15); 
-	GPIOA->MODER &= ~(1U<<18); 
-	GPIOA->MODER |= (1U<<19); 
+    RCC->AHB1ENR |= GPIOAEN;
 
-	GPIOA->AFR[0] |= (1U<<20); 
-	GPIOA->AFR[0] &= ~(1U<<21); 
+    // PA5, PA6, PA7 → AF5
+    GPIOA->MODER &= ~( (3U<<10) | (3U<<12) | (3U<<14) );
+    GPIOA->MODER |=  ( (2U<<10) | (2U<<12) | (2U<<14) );
 
-	GPIOA->AFR[0] |= (1U<<22); 
-	GPIOA->AFR[0] &= ~(1U<<23); 
+    GPIOA->AFR[0] &= ~(0xFFF << 20);
+    GPIOA->AFR[0] |=  (0x555 << 20);
 
-	GPIOA->AFR[0] |= (1U<<24); 
-	GPIOA->AFR[0] &= ~(1U<<25); 
-	GPIOA->AFR[0] |= (1U<<26); 
-	GPIOA->AFR[0] &= ~(1U<<27); 
-
-	GPIOA->AFR[0] |= (1U<<28); 
-	GPIOA->AFR[0] &= ~(1U<<29); 
-	GPIOA->AFR[0] |= (1U<<30); 
-	GPIOA->AFR[0] &= ~(1U<<31); 
+    // PA9 → output
+    GPIOA->MODER &= ~(3U<<18);
+    GPIOA->MODER |=  (1U<<18);
+    GPIOA->ODR |= (1U<<9);
 }
 
 void spi1_config(void){
-	RCC->APB2ENR |= SPI1EN; 
-	// set clock to fPCLK/4
+	RCC->APB2ENR |= SPI1EN; //enable SPI1's Clock (RM0383 6.3.12, p. 121)
+	// set clock to fPCLK/4 (001), 
 	SPI1->CR1 |= (1U<<3); 
 	SPI1->CR1 &= ~(1U<<4); 
 	SPI1->CR1 &= ~(1U<<5); 
@@ -62,29 +49,32 @@ void spi1_config(void){
 void spi1_transmit(uint8_t *data, uint32_t size){
 	uint32_t i = 0; 
 	uint8_t temp; 
-	while(i < size){
+	for(uint32_t i = 0; i < size; i++){
 		//wait until TXE set (nothing left to transmit from previous calls)
 		while( ! (SPI1->SR & (SR_TXE) )) {}
 		//write data to data register
 		SPI1->DR = data[i];
-	    i++; 
 	}
-	//wait until TXE set
+	//wait until TXE set (nothing left to transmit)
 	while(!(SPI1->SR & (SR_TXE) )){}
-    //wait for BUSY flag to reset
+	//wait for BUSY flag to reset (don't clear flags and exit until transmission done)
 	while((SPI1->SR & (SR_BSY) )) {}
+
 	//clear OVR flag by doing 'software operation'
-	temp = SPI1->DR;
-	temp = SPI1->SR; 
+	// temp = SPI1->DR;
+	// temp = SPI1->SR; 
+    (void)SPI1->DR;
+    (void)SPI1->SR;
 }
 
 void spi1_receive(uint8_t *data, uint32_t size){
-	while(size){ //every byte transmitted one at a time
+	for(uint32_t i = 0; i < size; i++){ //every byte transmitted one at a time
 		while(!(SPI1->SR & SR_TXE)){}
-		SPI1->DR = 0; 
+		SPI1->DR = 0; //dummy byte to generate clock
 		while(!(SPI1->SR & (SR_RXNE))){}
 		*data++ = (SPI1->DR); 
-		size--; 
+		//wait for BUSY flag to reset (don't clear flags and exit until transmission done)
+		while((SPI1->SR & (SR_BSY) )) {}
 	}
 }
 //control the CS pin, enable slave device

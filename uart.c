@@ -37,6 +37,15 @@ static uint16_t compute_uart_bd(uint32_t periph_clk, uint32_t baudrate){
 	return ((periph_clk + (baudrate/2U)) / baudrate); 
 }
 
+void uart_print_hex(uint8_t value) {
+    const char hex_chars[] = "0123456789ABCDEF";
+
+    uart_write('0');
+    uart_write('x');
+    uart_write(hex_chars[(value >> 4) & 0xF]);
+    uart_write(hex_chars[value & 0xF]);
+}
+
 static void uart_set_baudrate(uint32_t periph_clk, uint32_t baudrate){
 	USART2->BRR = compute_uart_bd(periph_clk, baudrate); 
 }
@@ -67,7 +76,7 @@ void uart_print_float(float value) {
         value = -value;
     }
     int whole = (int)value;
-    int frac = (int)((value - whole) * 1000);  // 2 decimal places, can increase
+    int frac = (int)((value - whole) * 100);  // 2 decimal places, can increase
     uart_print_int(whole);
     uart_write('.');
     if (frac < 10) uart_write('0'); // leading zero

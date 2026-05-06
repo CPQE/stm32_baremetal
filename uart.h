@@ -7,7 +7,7 @@
 #include <string.h>
 #define GPIOAEN (1U << 0) //enable clock for GPIO A by setting bit 0 in AHB1ENR register
 #define UART2EN (1U << 17) //enables clock for UART2 by setting bit 17 in the APB1ENR register
-
+// #define DBG_UART_BAUDRATE 921600 //trying at 2Mbps
 #define DBG_UART_BAUDRATE 115200 //baud rate at 115200 bps
 #define SYS_FREQ 16000000 //system clock runs at 16MHz
 #define APB1_CLK SYS_FREQ
@@ -20,4 +20,5 @@ void uart_init(void);
 void uart_print_int(int value);
 void uart_print_label(const char *label, int value);
 void uart_print_float(float value);
+void uart_print_hex(uint8_t value);
 #endif 

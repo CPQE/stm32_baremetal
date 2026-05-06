@@ -8,7 +8,7 @@ C_DEFS = \
 -DSTM32 \
 -DNUCLEO_F411RE \
 -DDEBUG
-CFLAGS = -c -mcpu=cortex-m4 -mthumb -std=gnu11 -g3 -O0 $(C_INCLUDES) $(C_DEFS)
+CFLAGS = -c -mcpu=cortex-m4 -mthumb -std=gnu11 -g3 -O0  -mfloat-abi=hard -mfpu=fpv4-sp-d16 $(C_INCLUDES) $(C_DEFS)
 #-nostdlib
 LDFLAGS = -T stm32_ls.ld -Wl,-Map=makefile_project.map -lgcc -lm -nostartfiles  
 SRC = main.c stm32f411_startup.c gpio.c systick.c tim.c uart.c adxl345.c spi.c
